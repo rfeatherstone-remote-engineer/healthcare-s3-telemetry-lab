@@ -13,3 +13,11 @@ python3 core/system_monitor.py | python3 compliance/phi_sanitizer.py | jq .
 python3 compliance/postmortem_gen.py
 python3 -m unittest discover -s tests -v
 ```
+
+## Level 3: Bounded Self-Healing Executor (`remediation/self_healer.py`)
+
+Consumes alert JSON objects over a Unix pipe (`stdin -> stdout`) and applies idempotent, low-blast-radius containment actions with strict SRE safety guardrails:
+
+- **Safe `--dry-run` Default:** Simulates remediation decisions and writes audit entries without altering host state unless `--execute` is explicitly passed.
+- **Cooldown Circuit Breaker:** Enforces a configurable cooldown window (default `300s` per `alert_id`) with atomic state persistence to prevent flapping alerts from triggering remediation storms.
+- **Immutable JSONL Audit Trail:** Records every decision (`DRY_RUN_SIMULATED`, `EXECUTED`, `SUPPRESSED_CIRCUIT_BREAKER`, `SKIPPED_NO_ACTION`) with timestamps and linked runbook IDs.
